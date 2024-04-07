@@ -119,6 +119,7 @@ class Program
     {
         return text.Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
     }
+    //GO samething wrong
     //static string UnicodeToUTF8(string from)
     //{
     //    var bytes = Encoding.UTF8.GetBytes(from);
