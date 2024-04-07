@@ -1,27 +1,35 @@
-﻿using ReadPhoto;
+﻿using System.Text;
+using ReadPhoto;
 using Tesseract;
 
 class Program
 {
-    static void Main(string[] args)
+    static void Main()
     {
         string imagePath = @"C:\Ulern\ReadPhoto\ReadPhoto\ReadPhoto\bin\Photo";
 
-        string[] imageFiles = Directory.GetFiles(imagePath, "*.jpg");
+        string[] imageFiles = Directory.GetFiles(imagePath, "*.png", SearchOption.AllDirectories);
 
         using (var engine = new TesseractEngine(@"tessdata", "por", EngineMode.Default))
         {
-            using (var img = Pix.LoadFromFile(imagePath))
+            foreach (var pathFile in imageFiles)
             {
-                using (var page = engine.Process(img))
+                using (var img = Pix.LoadFromFile(pathFile))
                 {
-                    string text = page.GetText().Replace('\n', ' ');
+                    using (var page = engine.Process(img))
+                    {
+                        string fileName = Path.GetFileName(pathFile);
 
-                    Cliente cliente = ExtractClienteData(text);
+                        string text = page.GetText().Replace('\n', ' ');
 
-                    string csvFilePath = @"C:\Ulern\ReadPhoto\ReadPhoto\ReadPhoto\bin\client_data.csv";
+                        var info = /*UnicodeToUTF8*/(string.Join(", ", fileName, text));
 
-                    WriteToCSV(csvFilePath, cliente);
+                        Cliente cliente = ExtractClienteData(info);
+
+                        string csvFilePath = @"C:\Ulern\ReadPhoto\ReadPhoto\ReadPhoto\bin\client_data.csv";
+
+                        WriteToCSV(csvFilePath, cliente);
+                    }
                 }
             }
         }
@@ -111,5 +119,10 @@ class Program
     {
         return text.Split(' ').Where(x => !string.IsNullOrEmpty(x)).ToArray();
     }
+    //static string UnicodeToUTF8(string from)
+    //{
+    //    var bytes = Encoding.UTF8.GetBytes(from);
+    //    return new string(bytes.Select(b => (char)b).ToArray());
+    //}
 }
 
